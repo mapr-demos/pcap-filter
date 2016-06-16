@@ -9,6 +9,17 @@ without moving anything. Any characteristic of packets that you want can be
 interrogated directly from the bytes in question on demand which increases speed
 further by avoiding the decoding of data that just gets thrown away.
 
+Simply putting a buffered stream in front of the parser doesn't solve the problem
+because you are still copying from that buffer. Moreover, you typically wind up
+copying and decoding all of the fields even if you only want one. If you try to 
+avoid that, then you wind up copying to a buffer inside your packet object and then
+copying from that buffer later when you want the objects.
+
+It is much more efficient to make the buffer large and explicit. Then you can simply
+find the boundaries of packets and decode only the field you are interested in. To do
+that requires that you have control over the life-span of the buffer and can control
+access. For a system like Drill which is scanning packets, this is easy to do.
+
 The tests in this project are really demonstration programs that show how much 
 difference this can make. You can run these tests using
 
